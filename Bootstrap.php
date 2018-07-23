@@ -31,6 +31,8 @@ use Shopware\Bundle\StoreFrontBundle\Struct\Category;
  */
 class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
+
+
     /**
      * Install plugin method
      *
@@ -103,18 +105,44 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
     }
 
 
-    public function getArticle()
+    public function getArticle($kategorien)
     {
         $client = new \ldsTools\ApiClient(
             'http://emmident.kunden.loewenstark.de/api/',
             'sschiller',
             'HTTaQOFeCgxh9sUVXFMXnJ9T4ogOfD3CAVRfJtog');
         $articleComplete = array ();
+        /*
         $idList = array(7, 1, 9, 10, 11, 13);
         $counter = 0;
         foreach ($idList as $id) {
-            $articleComplete[$counter] = $client->get('articles/'.$id);
-            $counter ++;
+             $articleComplete[$counter] = $client->get('articles/'.$id);
+             $counter ++;
+        }*/
+
+        $sArticles = $client->get('articles');
+        foreach ($sArticles as $Article){
+            $id = $Article['id'];
+            $kategorienArtikel = $client->get('articles/'.$id)['categories'];
+            $kategorienArtikelIds = [];
+            foreach ($kategorienArtikel as $kategorie){
+                $kategorienArtikelIds[] = $kategorie['id'];
+            }
+            $geimeinsameKategorien = array_intersect($kategorienArtikelIds, $kategorien);
+            if(!empty($geimeinsameKategorien)){
+                foreach ($geimeinsameKategorien as $kategorieId)
+                    if(empty($articleComplete[$kategorieId])){
+                        $articleComplete[$kategorieId] = [];
+                    }
+                $article = $client->get('articles/' . $id);
+                #TODO kleiner Bilder Laden
+                if($article['images'] && $article['images']['0'] && $article['images']['0']['mediaId']){
+                    $mediaID = $article['images']['0']['mediaId'];
+                    $media = $client->get('media/' . $mediaID);
+                    $article['ldsMedia'] = $media;
+                }
+                $articleComplete[$kategorieId][] = $article;
+            }
         }
         return $articleComplete;
     }
@@ -123,6 +151,7 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
      * Event listener method
      *
      * @param Enlight_Controller_ActionEventArgs $args
+     * @throws Exception
      */
     public function onPostDispatch(Enlight_Controller_ActionEventArgs $args)
     {
@@ -140,12 +169,25 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
 
         $menu = $this->getAdvancedMenu($parent, $categoryId, (int)$config->levels);
 
+        $subMenuIds = []; // Ids der Kategorien, desen Produkte im Haupmenu angezeigt werden sollen.
+        foreach ($menu as $hauptmenu) {
+            if (empty($hauptmenu['sub'])){
+                $subMenuIds[] = $hauptmenu['id']; //falls ein menu gar keine submenus hat hat es vll selber produkte.
+            } else {
+                foreach ($hauptmenu['sub'] as $submenu){
+                    if(!$submenu['hideTop']){
+                        $subMenuIds[] = $submenu['id'];
+                    }
+                }
+            }
+        }
+
+        $view->assign('subMenuIds', $subMenuIds);
         $view->assign('sAdvancedMenu', $menu);
         $view->assign('columnAmount', $config->columnAmount);
 
-        $view->assign('LDS_Menu_Extension', $this->getArticle());
+        $view->assign('LDS_Menu_Extension', $this->getArticle($subMenuIds));
         $view->assign('hoverDelay', $config->hoverDelay);
-
 
         $view->addTemplateDir($this->Path() . 'Views');
     }
@@ -158,6 +200,7 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
      * @param int $depth
      *
      * @return array
+     * @throws Exception
      */
     public function getAdvancedMenu($category, $activeCategoryId, $depth = null)
     {

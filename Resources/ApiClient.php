@@ -52,7 +52,8 @@ class ApiClient
         $result = curl_exec($this->cURL);
         $httpCode = curl_getinfo($this->cURL, CURLINFO_HTTP_CODE);
         $result = $this->prepareResponse($result, $httpCode);
-        return json_decode($result, true);
+        //return json_decode($result, true);
+        return $result;
     }
 
     public function get($url, $params = [])
@@ -78,40 +79,6 @@ class ApiClient
     protected function prepareResponse($result, $httpCode)
     {
         $decodedResult = json_decode($result, true);
-       /* echo "<h2>HTTP: $httpCode - janz toll</h2>";
-        if (null === $decodedResult = json_decode($result, true)) {
-            $jsonErrors = [
-                JSON_ERROR_NONE => 'No error occurred',
-                JSON_ERROR_DEPTH => 'The maximum stack depth has been reached',
-                JSON_ERROR_CTRL_CHAR => 'Control character issue, maybe wrong encoded',
-                JSON_ERROR_SYNTAX => 'Syntaxerror',
-            ];
-            echo '<h2>Could not decode json</h2>';
-            echo 'json_last_error: ' . $jsonErrors[json_last_error()];
-            echo '<br>Raw:<br>';
-            echo '<pre>' . print_r($result, true) . '</pre>';
-
-            return;
-        }
-        if (!isset($decodedResult['success'])) {
-            echo 'Invalid Response';
-
-            return;
-        }
-        if (!$decodedResult['success']) {
-            echo '<h2>No Success</h2>';
-            echo '<p>' . $decodedResult['message'] . '</p>';
-            if (array_key_exists('errors', $decodedResult) && is_array($decodedResult['errors'])) {
-                echo '<p>' . join('</p><p>', $decodedResult['errors']) . '</p>';
-            }
-
-            return;
-        } */
-        echo '<h2>Success</h2>';
-        if (isset($decodedResult['data'])) {
-            echo '<pre>' . print_r($decodedResult['data'], true) . '</pre>';
-        }
-
         return $decodedResult['data'];
     }
 }
