@@ -112,18 +112,15 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
             'sschiller',
             'HTTaQOFeCgxh9sUVXFMXnJ9T4ogOfD3CAVRfJtog');
         $articleComplete = array ();
-        /*
-        $idList = array(7, 1, 9, 10, 11, 13);
-        $counter = 0;
-        foreach ($idList as $id) {
-             $articleComplete[$counter] = $client->get('articles/'.$id);
-             $counter ++;
-        }*/
 
         $sArticles = $client->get('articles');
         foreach ($sArticles as $Article){
             $id = $Article['id'];
-            $kategorienArtikel = $client->get('articles/'.$id)['categories'];
+            $article = $client->get('articles/'.$id);
+            if (!$article['mainDetail']['attribute']['ldsShowInAdvancedMenu']) {
+                continue;
+            }
+            $kategorienArtikel = $article['categories'];
             $kategorienArtikelIds = [];
             foreach ($kategorienArtikel as $kategorie){
                 $kategorienArtikelIds[] = $kategorie['id'];
@@ -134,14 +131,13 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
                     if(empty($articleComplete[$kategorieId])){
                         $articleComplete[$kategorieId] = [];
                     }
-                $article = $client->get('articles/' . $id);
                 #TODO kleiner Bilder Laden
                 if($article['images'] && $article['images']['0'] && $article['images']['0']['mediaId']){
                     $mediaID = $article['images']['0']['mediaId'];
                     $media = $client->get('media/' . $mediaID);
                     $article['ldsMedia'] = $media;
                 }
-                $articleComplete[$kategorieId][] = $article;
+                    $articleComplete[$kategorieId][] = $article;
             }
         }
         return $articleComplete;
