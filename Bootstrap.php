@@ -111,33 +111,33 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
             'http://emmident.kunden.loewenstark.de/api/',
             'sschiller',
             'HTTaQOFeCgxh9sUVXFMXnJ9T4ogOfD3CAVRfJtog');
-        $articleComplete = array ();
+        $articleComplete = array();
 
         $sArticles = $client->get('articles');
-        foreach ($sArticles as $Article){
+        foreach ($sArticles as $Article) {
             $id = $Article['id'];
-            $article = $client->get('articles/'.$id);
+            $article = $client->get('articles/' . $id);
             if (!$article['mainDetail']['attribute']['ldsShowInAdvancedMenu']) {
                 continue;
             }
             $kategorienArtikel = $article['categories'];
             $kategorienArtikelIds = [];
-            foreach ($kategorienArtikel as $kategorie){
+            foreach ($kategorienArtikel as $kategorie) {
                 $kategorienArtikelIds[] = $kategorie['id'];
             }
             $geimeinsameKategorien = array_intersect($kategorienArtikelIds, $kategorien);
-            if(!empty($geimeinsameKategorien)){
+            if (!empty($geimeinsameKategorien)) {
                 foreach ($geimeinsameKategorien as $kategorieId)
-                    if(empty($articleComplete[$kategorieId])){
+                    if (empty($articleComplete[$kategorieId])) {
                         $articleComplete[$kategorieId] = [];
                     }
                 #TODO kleiner Bilder Laden
-                if($article['images'] && $article['images']['0'] && $article['images']['0']['mediaId']){
+                if ($article['images'] && $article['images']['0'] && $article['images']['0']['mediaId']) {
                     $mediaID = $article['images']['0']['mediaId'];
                     $media = $client->get('media/' . $mediaID);
                     $article['ldsMedia'] = $media;
                 }
-                    $articleComplete[$kategorieId][] = $article;
+                $articleComplete[$kategorieId][] = $article;
             }
         }
         return $articleComplete;
@@ -167,11 +167,11 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
 
         $subMenuIds = []; // Ids der Kategorien, desen Produkte im Haupmenu angezeigt werden sollen.
         foreach ($menu as $hauptmenu) {
-            if (empty($hauptmenu['sub'])){
+            if (empty($hauptmenu['sub'])) {
                 $subMenuIds[] = $hauptmenu['id']; //falls ein menu gar keine submenus hat hat es vll selber produkte.
             } else {
-                foreach ($hauptmenu['sub'] as $submenu){
-                    if(!$submenu['hideTop']){
+                foreach ($hauptmenu['sub'] as $submenu) {
+                    if (!$submenu['hideTop']) {
                         $subMenuIds[] = $submenu['id'];
                     }
                 }
