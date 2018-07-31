@@ -132,15 +132,11 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
                     if (empty($articleComplete[$kategorieId])) {
                         $articleComplete[$kategorieId] = [];
                     }
-                #TODO kleiner Bilder Laden
-                if ($article['images'] && $article['images']['0'] && $article['images']['0']['mediaId']) {
-                    $mediaID = $article['images']['0']['mediaId'];
-                    $media = $client->get('media/' . $mediaID);
-                    $article['ldsMedia'] = $media;
-                }
+                $article['ldsImgPath'] = Shopware()->Modules()->Articles()->sGetArticleById($id)['image']['thumbnails']['0']['source'];
                 $articleComplete[$kategorieId][] = $article;
             }
         }
+
         return $articleComplete;
     }
 
@@ -168,11 +164,11 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
 
         $subMenuIds = []; // Ids der Kategorien, desen Produkte im Haupmenu angezeigt werden sollen.
         foreach ($menu as $hauptmenu) {
-            if (empty($hauptmenu['sub'])) {
+            if (empty($hauptmenu['sub']) && $hauptmenu['attribute']['lds_advanced_menu_img_link'] != 1 ) {
                 $subMenuIds[] = $hauptmenu['id']; //falls ein menu gar keine submenus hat hat es vll selber produkte.
             } else {
                 foreach ($hauptmenu['sub'] as $submenu) {
-                    if (!$submenu['hideTop']) {
+                    if (!$submenu['hideTop'] && $submenu['attribute']['lds_advanced_menu_img_link'] != 1 ) {
                         $subMenuIds[] = $submenu['id'];
                     }
                 }
@@ -180,12 +176,9 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
         }
 
         $view->assign('sAdvancedMenu', $menu);
-        //$view->assign('ShopwareModuleAbfrage', Shopware()->Modules()->Articles()->sGetArticlesByCategory(7));
         $view->assign('columnAmount', $config->columnAmount);
-
         $view->assign('LDS_Menu_Extension', $this->getArticle($subMenuIds));
         $view->assign('hoverDelay', $config->hoverDelay);
-
         $view->addTemplateDir($this->Path() . 'Views');
     }
 

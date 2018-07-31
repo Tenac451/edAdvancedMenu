@@ -74,8 +74,8 @@
             {foreach $LDS_Menu_Extension[{$category.id}] as $article}
                 {call name=item
                 link="detail/index/sArticle/{$article.id}"
-                ImgAlt="{$article['ldsMedia']['name']}"
-                ImgPath="{$article['ldsMedia']['path']}"
+                ImgAlt="{$article['name']}"
+                ImgPath="{$article['ldsImgPath']}"
                 title=$article['name']
                 }
             {/foreach}
