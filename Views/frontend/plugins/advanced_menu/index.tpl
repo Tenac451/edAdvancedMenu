@@ -10,7 +10,15 @@
         {/if}
         {$hasSubs = (!empty({$category.sub}))}
         {if $hasSubs}
+            {if $category['attribute']['lds_advanced_menu_img_link']}
+                <li class="menu--list-item item--level-{$level}">
+                <ul class="emmi-items">
+            {/if}
             {call name=categories_sub categories=$category.sub level=$level+1}
+            {if $category['attribute']['lds_advanced_menu_img_link']}
+                </ul>
+                </li>
+            {/if}
         {/if}
     </ul>
 {/function}
@@ -18,16 +26,30 @@
 {function name="categories_sub" level=0}
     {$columnIndex = 0}
     {$columnCount = 4 - ($columnAmount * intval($hasTeaser))}
-        {block name="frontend_plugins_advanced_menu_list"}
-            {foreach $categories as $category}
-                {if $category.hideTop}
-                    {continue}
+    {block name="frontend_plugins_advanced_menu_list"}
+        {foreach $categories as $category}
+            {if $category.hideTop}
+                {continue}
+            {/if}
+            {if $category.external}
+                {$categoryLink = $category.external}
+            {/if}
+            {* Item Kategorielink *}
+            {$categoryLink = $category.link}
+            {if $category['attribute']['lds_advanced_menu_img_link']}
+                {if $category['media']['path'] }
+                    {$imagepath = {$category['media']['path']}}
+                {else}
+                    {$imagepath = "/themes/Frontend/Responsive/frontend/_public/src/img/no-picture.jpg"}
                 {/if}
-                {* Item Kategorielink *}
-                {$categoryLink = $category.link}
-                {if $category.external}
-                    {$categoryLink = $category.external}
-                {/if}
+
+                {call name=item
+                link=$categoryLink
+                ImgAlt="{$category.name}"
+                ImgPath="{$imagepath}"
+                title="{$category.name}"
+                }
+            {else}
                 <li class="menu--list-item item--level-{$level}"{if $level === 0} style="width: 100%"{/if}>
                     {block name="frontend_plugins_advanced_menu_list_item"}
                         <a href="{$categoryLink|escapeHtml}" class="menu--list-item-link"
@@ -41,25 +63,36 @@
                 {* Item Liste *}
                 {call name="item_list" level=$level category=$category}
                 {* Item Liste END*}
-            {/foreach}
-        {/block}
+            {/if}
+        {/foreach}
+    {/block}
 {/function}
 
 {function name="item_list"}
     <li class="menu--list-item item--level-{$level}">
         <ul class="emmi-items">
             {foreach $LDS_Menu_Extension[{$category.id}] as $article}
-                <li class="emmi-item">
-                    {* TODO seo URL *}
-                    <a class="emmi-item__link" href="detail/index/sArticle/{$article.id}">
-                        <img class="emmi-item__thumb" src="{$article['ldsMedia']['path']}" alt="{$article['ldsMedia']['name']}">
-                        <span class="emmi-item__name">{$article['name']} </span>
-                    </a>
-                </li>
+                {call name=item
+                link="detail/index/sArticle/{$article.id}"
+                ImgAlt="{$article['ldsMedia']['name']}"
+                ImgPath="{$article['ldsMedia']['path']}"
+                title=$article['name']
+                }
             {/foreach}
         </ul>
     </li>
 {/function}
+
+{function name="item"}
+    <li class="emmi-item">
+        {* TODO seo URL *}
+        <a class="emmi-item__link" href="{$link}">
+            <img class="emmi-item__thumb" src="{$ImgPath}" alt="{$ImgAlt}">
+            <span class="emmi-item__name">{$title}</span>
+        </a>
+    </li>
+{/function}
+
 <div class="advanced-menu" data-advanced-menu="true" data-hoverDelay="{$hoverDelay}">
     {block name="frontend_plugins_advanced_menu"}
         {foreach $sAdvancedMenu as $mainCategory}
@@ -75,11 +108,11 @@
                 {block name="frontend_plugins_advanced_menu_main_container"}
                     <div class="button-container">
                     </div>
-                        <div class="content--wrapper{if $hasCategories} has--content{/if}{if $hasTeaser} has--teaser{/if}">
-                            {block name="frontend_plugins_advanced_menu_sub_categories"}
-                                {call name="categories_top" category=$mainCategory}
-                            {/block}
-                        </div>
+                    <div class="content--wrapper{if $hasCategories} has--content{/if}{if $hasTeaser} has--teaser{/if}">
+                        {block name="frontend_plugins_advanced_menu_sub_categories"}
+                            {call name="categories_top" category=$mainCategory}
+                        {/block}
+                    </div>
                 {/block}
             </div>
         {/foreach}

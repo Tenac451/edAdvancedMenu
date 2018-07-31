@@ -114,6 +114,7 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
         $articleComplete = array();
 
         $sArticles = $client->get('articles');
+
         foreach ($sArticles as $Article) {
             $id = $Article['id'];
             $article = $client->get('articles/' . $id);
@@ -178,8 +179,8 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
             }
         }
 
-        $view->assign('subMenuIds', $subMenuIds);
         $view->assign('sAdvancedMenu', $menu);
+        //$view->assign('ShopwareModuleAbfrage', Shopware()->Modules()->Articles()->sGetArticlesByCategory(7));
         $view->assign('columnAmount', $config->columnAmount);
 
         $view->assign('LDS_Menu_Extension', $this->getArticle($subMenuIds));
