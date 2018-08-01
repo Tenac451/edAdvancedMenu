@@ -43,6 +43,39 @@ class Shopware_Plugins_Frontend_EdAdvancedMenu_Bootstrap extends Shopware_Compon
         $this->subscribeEvents();
         $this->createForm();
 
+        $service = Shopware()->Container()->get( 'shopware_attribute.crud_service' );
+
+        $service->update( 's_articles_attributes', 'lds_show_in_advanced_menu', 'boolean', [
+            'label'            => 'Zeige Item im Megamenu',
+            'displayInBackend' => true,
+            'translatable'     => true,
+        ] );
+        $service->update( 's_categories_attributes', 'lds_advanced_menu_img_link', 'boolean', [
+            'label'            => 'Als Bildlink',
+            'displayInBackend' => true,
+            'translatable'     => true,
+        ] );
+
+
+
+        $metaDataCache = Shopware()->Models()->getConfiguration()->getMetadataCacheImpl();
+        $metaDataCache->deleteAll();
+        Shopware()->Models()->generateAttributeModels( [ 's_articles_attributes', 's_categories_attributes' ] );
+
+        return true;
+    }
+    public function uninstall()
+    {
+
+        $service = Shopware()->Container()->get( 'shopware_attribute.crud_service' );
+
+        $service->delete( 's_articles_attributes', 'lds_show_in_advanced_menu' );
+        $service->delete( 's_categories_attributes', 'lds_advanced_menu_img_link' );
+
+        $metaDataCache = Shopware()->Models()->getConfiguration()->getMetadataCacheImpl();
+        $metaDataCache->deleteAll();
+        Shopware()->Models()->generateAttributeModels( [ 's_articles_attributes' ] );
+
         return true;
     }
 

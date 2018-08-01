@@ -10,7 +10,6 @@ Bitte Freitextfelder anglegen für:
 ##### Kategorie (s_categories_attributes)
 * lds_advanced_menu_img_link - Checkbox
 
-leider konnte ich diese nicht via Install des plugins hinzufügen. 
 Artikel welche im Megamenu angezeigt werden sollen, brauchen dieses flag, 
 
 *Kategorien*, welche anstelle eines farbigen Balkens mit einem Bild
